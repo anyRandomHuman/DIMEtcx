@@ -1,0 +1,48 @@
+#@package _global_
+defaults:
+  - alg: dime
+  - sampler: dis
+  - setup
+  - _self_
+  - override hydra/launcher: submitit_slurm
+#
+#hydra:
+#  # Tell Hydra to use the Slurm launcher
+#  launcher:
+#    _target_: hydra_plugins.hydra_slurm_launcher.slurm_launcher.SlurmLauncher
+#
+#    # --- SLURM Configuration ---
+#    # Your partition/queue
+#    partition: your_partition_name
+#
+#    # You can add any sbatch-compatible options here
+#    sbatch_options:
+#      - "--time=00:30:00"
+#      - "--gres=gpu:1"
+#
+#    # --- Hydra Job Configuration ---
+#    # Set where to put Slurm logs
+#    submit_command: sbatch
+#    output_dir_date_format: "%Y-%m-%d_%H-%M-%S"
+#    # This creates one log file per job in your multirun output dir
+#    capture_output: true
+
+seed: 0
+use_jit: true
+tot_time_steps: 1e6
+log_freq: 100
+step_size: ${alg.optimizer.lr_actor}
+step_size_betas: ${alg.optimizer.lr_actor}
+use_path_gradient: False
+use_target_score: False
+dt: 0.1
+learn_dt: True
+per_step_dt: False
+per_dim_friction: True
+# Related to the learning rate scheduler (not used in DIME)
+use_step_size_scheduler: False
+warmup: const
+iters: ${tot_time_steps}
+warmup_iters: 60_000
+
+env_name: dm_control/dog-run
