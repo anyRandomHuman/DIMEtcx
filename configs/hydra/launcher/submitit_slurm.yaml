@@ -1,0 +1,32 @@
+# @package hydra.launcher
+submitit_folder: ${hydra.sweep.dir}/submitit/%j
+timeout_min: 600 # 24 hours, set to more if required
+cpus_per_task: 32
+gpus_per_node: 1 # Leave null
+# If using ddp, this needs to be greater than or equal to the number of GPUs in each node
+tasks_per_node: 1
+mem_gb: 64
+nodes: 1
+name: ${hydra.job.name}
+_target_: hydra_plugins.hydra_submitit_launcher.submitit_launcher.SlurmLauncher
+partition: gpu_h100_il
+qos: null
+comment: null
+constraint: null # Leave null
+exclude: null # Leave null
+gres: "gpu:1" # The number of GPUs you require
+cpus_per_gpu: null # Leave null
+gpus_per_task: null # Leave null
+mem_per_gpu: null # Leave null
+mem_per_cpu: null # Leave null
+account: ka_et4232
+max_num_timeout: 0
+# Only include this if you want to requeue your jobs
+#additional_parameters: { signal: SIGUSR1@90, requeue: true }
+# Idk what this does
+array_parallelism: 10
+# Put whatever commands you want to run before the job here
+setup:
+    - module load  devel/cuda/12.8
+    - conda activate dime
+    - export MUJOCO_GL=egl
