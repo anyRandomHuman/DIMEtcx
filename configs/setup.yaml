@@ -1,5 +1,5 @@
 wandb:
-  entity: null
+  entity: tcx513887573
   group: DIME_${env_name}
   project: DIME
   job_type: lr${alg.optimizer.lr_actor}

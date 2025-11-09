@@ -16,7 +16,6 @@ from stable_baselines3.common.callbacks import CallbackList
 from models.actor_critic_evaluation_callback import EvalCallback
 
 
-
 def _create_alg(cfg: DictConfig):
     import gymnasium as gym
     try:
@@ -35,11 +34,16 @@ def _create_alg(cfg: DictConfig):
     tensorboard_log_dir = f"./logs/{cfg.wandb['group']}/{cfg.wandb['job_type']}/seed= + {str(cfg.seed)}/"
     eval_log_dir = f"./eval_logs/{cfg.wandb['group']}/{cfg.wandb['job_type']}/seed= + {str(cfg.seed)}/eval/"
 
+    save_path = './checkpoints'
+    if os.environ.get('SLURM_SUBMIT_DIR'):
+        save_path = '/pfs/work9/workspace/scratch/ka_et4232-tcx/checkpoints/dime'
+    save_path = save_path + env_name_split[1] + f'/{cfg.seed}'
+    os.makedirs(save_path, exist_ok=True)
 
     model = DIME(
         "MultiInputPolicy" if isinstance(training_env.observation_space, gym.spaces.Dict) else "MlpPolicy",
         env=training_env,
-        model_save_path=None,
+        model_save_path=save_path,
         save_every_n_steps=int(cfg.tot_time_steps / 100000),
         cfg=cfg,
         tensorboard_log=tensorboard_log_dir,
