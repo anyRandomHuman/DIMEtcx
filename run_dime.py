@@ -7,6 +7,7 @@ import omegaconf
 import traceback
 
 from common.buffers import DMCCompatibleDictReplayBuffer
+from common.envs import ParallelEnv, ParallelVecEnv
 from diffusion.dime import DIME
 from omegaconf import DictConfig
 from models.utils import is_slurm_job
@@ -24,9 +25,11 @@ def _create_alg(cfg: DictConfig):
         print("myosuite not installed")
         pass
 
-    training_env = gym.make(cfg.env_name)
-    eval_env = make_vec_env(cfg.env_name, n_envs=1, seed=cfg.seed)
-    env_name_split = cfg.env_name.split('/')
+    # training_env = gym.make(cfg.env_name)
+    # eval_env = make_vec_env(cfg.env_name, n_envs=1, seed=cfg.seed)
+    training_env = ParallelVecEnv(cfg.env_name)
+    eval_env = ParallelVecEnv(cfg.env_name, seed=42)
+    env_name_split = cfg.env_name[0].split('/')
     rb_class = None
     if env_name_split[0] == 'dm_control':
         rb_class = DMCCompatibleDictReplayBuffer if env_name_split[1].split('-')[0] in ['humanoid', 'fish', 'walker', 'quadruped','finger'] else None
@@ -38,10 +41,12 @@ def _create_alg(cfg: DictConfig):
     if os.environ.get('SLURM_SUBMIT_DIR'):
         save_path = '/pfs/work9/workspace/scratch/ka_et4232-tcx/checkpoints/dime'
     save_path = save_path + f'/{env_name_split[1]}/{cfg.seed}'
+
     os.makedirs(save_path, exist_ok=True)
 
+    policy = "MultiInputPolicy" if isinstance(training_env.observation_space, gym.spaces.Dict) else "MlpPolicy"
     model = DIME(
-        "MultiInputPolicy" if isinstance(training_env.observation_space, gym.spaces.Dict) else "MlpPolicy",
+        policy,
         env=training_env,
         model_save_path=save_path,
         save_every_n_steps=int(cfg.tot_time_steps / 10),

@@ -124,7 +124,7 @@ class DiffPol(BaseJaxPolicy):
             self.reset_noise()
         actions, *_ = DiffPol.sample_action(self.actor_state, self.actor_state.params, observation, self.noise_key,
                                             self.sampler)
-        return actions[0]
+        return actions
 
     def _predict2(self, observation: np.ndarray, deterministic: bool = False) -> np.ndarray:
         # Trick to use gSDE: repeat sampled noise by using the same noise key
