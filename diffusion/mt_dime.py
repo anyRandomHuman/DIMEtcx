@@ -1,6 +1,5 @@
 import os
 
-import gym
 import jax
 import flax
 import optax
@@ -14,11 +13,10 @@ from functools import partial
 from diffusion.diffusion_policy import DiffPol
 from flax.training.train_state import TrainState
 from stable_baselines3.common.noise import ActionNoise
-from stable_baselines3.common.buffers import ReplayBuffer
 from diffusion.dime import DIME
 from common.type_aliases import ReplayBufferSamplesMTNP, RLTrainState
 from typing import Any, ClassVar, Dict, Optional, Tuple, Type, Union
-from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback
+from stable_baselines3.common.type_aliases import GymEnv
 from common.buffers import MTReplayBuffer
 
 class EntropyCoef(nn.Module):

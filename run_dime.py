@@ -87,7 +87,7 @@ def initialize_and_run(cfg):
     cfg = hydra.utils.instantiate(cfg)
     seed = cfg.seed
     if cfg.wandb["activate"]:
-        name = f"seed_{seed}"
+        name = f"{str(cfg.env_name)}_{seed}"
         wandb_config = omegaconf.OmegaConf.to_container(cfg, resolve=True, throw_on_missing=True)
         wandb.init(
             settings=wandb.Settings(_service_wait=300),
