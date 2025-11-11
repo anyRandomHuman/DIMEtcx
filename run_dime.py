@@ -15,7 +15,7 @@ from wandb.integration.sb3 import WandbCallback
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.callbacks import CallbackList
 from models.actor_critic_evaluation_callback import EvalCallback
-
+from diffusion.mt_dime import MTDIME
 
 def _create_alg(cfg: DictConfig):
     import gymnasium as gym
@@ -45,7 +45,16 @@ def _create_alg(cfg: DictConfig):
     os.makedirs(save_path, exist_ok=True)
 
     policy = "MultiInputPolicy" if isinstance(training_env.observation_space, gym.spaces.Dict) else "MlpPolicy"
-    model = DIME(
+    # model = DIME(
+    #     policy,
+    #     env=training_env,
+    #     model_save_path=save_path,
+    #     save_every_n_steps=int(cfg.tot_time_steps / 10),
+    #     cfg=cfg,
+    #     tensorboard_log=tensorboard_log_dir,
+    #     replay_buffer_class=rb_class
+    # )
+    model = MTDIME(
         policy,
         env=training_env,
         model_save_path=save_path,

@@ -21,3 +21,11 @@ class ReplayBufferSamplesNp(NamedTuple):
     next_observations: np.ndarray
     dones: np.ndarray
     rewards: np.ndarray
+
+class ReplayBufferSamplesMTNP(NamedTuple):
+    observations: np.ndarray
+    actions: np.ndarray
+    next_observations: np.ndarray
+    dones: np.ndarray
+    rewards: np.ndarray
+    task_ids: np.ndarray
