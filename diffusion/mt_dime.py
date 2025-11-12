@@ -18,6 +18,7 @@ from common.type_aliases import ReplayBufferSamplesMTNP, RLTrainState
 from typing import Any, ClassVar, Dict, Optional, Tuple, Type, Union
 from stable_baselines3.common.type_aliases import GymEnv
 from common.buffers import MTReplayBuffer
+from common.normalizer import RewardNormalizer
 
 class EntropyCoef(nn.Module):
     ent_coef_init: float = 1.0
@@ -65,6 +66,7 @@ class MTDIME(DIME):
                  verbose: int = 0,
                  _init_setup_model: bool = True,
                  stats_window_size: int = 100,
+                 normalize_reward: bool = False
                  ) -> None:
         self.n_tasks = cfg.n_tasks
         super().__init__(
@@ -85,6 +87,8 @@ class MTDIME(DIME):
             _init_setup_model=_init_setup_model,
             stats_window_size=stats_window_size,
         )
+        self.normalize_reward = normalize_reward
+        self.normalizer = RewardNormalizer(0, self.target_entropy) if normalize_reward else None
 
 
 
@@ -115,6 +119,10 @@ class MTDIME(DIME):
             data.rewards.numpy().flatten(),
             data.task_ids.numpy().flatten()
         )
+
+        if self.normalize_reward:
+            ent_coef_value = self.ent_coef_state.apply_fn({"params": self.ent_coef_state.params}, self.num_timesteps)
+            data = self.normalizer.normalize(data, temperature=ent_coef_value)
 
         (
             self.policy.qf_state,
@@ -163,7 +171,7 @@ class MTDIME(DIME):
 
     @staticmethod
     @partial(jax.jit, static_argnames=["crossq_style", "use_bnstats_from_live_net", "sampler", "num_atoms", "z_atoms",
-                                       "v_min", "v_max", "entr_coeff"])
+                                       "v_min", "v_max"])
     def update_critic(
             crossq_style: bool,
             use_bnstats_from_live_net: bool,
@@ -530,6 +538,23 @@ class MTDIME(DIME):
 
         if not hasattr(self, "policy") or self.policy is None or reset:
             super()._setup_model(reset=True)
+
+    # def collect_rollouts(
+    #     self,
+    #     env: VecEnv,
+    #     callback: BaseCallback,
+    #     train_freq: TrainFreq,
+    #     replay_buffer: ReplayBuffer,
+    #     action_noise: Optional[ActionNoise] = None,
+    #     learning_starts: int = 0,
+    #     log_interval: Optional[int] = None,
+    # ) -> RolloutReturn:
+    #     r = super().collect_rollouts(env, callback, train_freq,replay_buffer, action_noise,learning_starts,log_interval)
+    #     reward = self.replay_buffer.rewards[self.replay_buffer.pos]
+    #
+    #     self.normalizer.update()
+    #     return r
+
 
 
 # Save and load model

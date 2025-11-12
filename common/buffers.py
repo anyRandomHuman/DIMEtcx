@@ -68,7 +68,7 @@ class MTReplayBuffer(ReplayBuffer):
         self.task_ids = np.expand_dims(tasks, 0).repeat(self.buffer_size, 0)
 
     def _get_samples(self, batch_inds: np.ndarray, env: Optional[VecNormalize] = None) -> ReplayBufferSamplesMTNP:
-        # Sample randomly the env idx
+        # Sample randomly the env idx, no need to include all tasks at once(as in BRC)
         env_indices = np.random.randint(0, high=self.n_envs, size=(len(batch_inds),))
 
         if self.optimize_memory_usage:
