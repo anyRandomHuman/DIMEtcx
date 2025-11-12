@@ -67,5 +67,5 @@ class RewardNormalizer(object):
         denominator = (denominator - temperature * self.effective_horizon * self.target_entropy / 2) / self.v_max
         denominator = denominator[batches.task_ids]
         rewards = batches.rewards / denominator
-        return ReplayBufferSamplesMTNP(observations=batches.observations, actions=batches.actions, rewards=rewards, next_observations=batches.next_observations, task_ids=batches.task_ids)
+        return ReplayBufferSamplesMTNP(observations=batches.observations, actions=batches.actions, rewards=rewards, next_observations=batches.next_observations, task_ids=batches.task_ids, dones=batches.dones)
    

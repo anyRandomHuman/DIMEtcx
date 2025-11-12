@@ -66,7 +66,6 @@ class MTDIME(DIME):
                  verbose: int = 0,
                  _init_setup_model: bool = True,
                  stats_window_size: int = 100,
-                 normalize_reward: bool = False
                  ) -> None:
         self.n_tasks = cfg.n_tasks
         super().__init__(
@@ -87,8 +86,8 @@ class MTDIME(DIME):
             _init_setup_model=_init_setup_model,
             stats_window_size=stats_window_size,
         )
-        self.normalize_reward = normalize_reward
-        self.normalizer = RewardNormalizer(env.num_envs, self.target_entropy, discount=cfg.alg.gamma, v_max=cfg.alg.vmax) if normalize_reward else None
+        self.normalize_reward = cfg.alg.normalize_reward
+        self.normalizer = RewardNormalizer(env.num_envs, self.target_entropy, discount=cfg.alg.gamma, v_max=cfg.alg.vmax) if self.normalize_reward else None
 
 
     def train(self, batch_size, gradient_steps):
