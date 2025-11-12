@@ -88,8 +88,7 @@ class MTDIME(DIME):
             stats_window_size=stats_window_size,
         )
         self.normalize_reward = normalize_reward
-        self.normalizer = RewardNormalizer(0, self.target_entropy, v_max=cfg.alg.vmax) if normalize_reward else None
-
+        self.normalizer = RewardNormalizer(env.num_envs, self.target_entropy, discount=cfg.alg.gamma, v_max=cfg.alg.vmax) if normalize_reward else None
 
 
     def train(self, batch_size, gradient_steps):
@@ -539,21 +538,21 @@ class MTDIME(DIME):
         if not hasattr(self, "policy") or self.policy is None or reset:
             super()._setup_model(reset=True)
 
-    # def collect_rollouts(
-    #     self,
-    #     env: VecEnv,
-    #     callback: BaseCallback,
-    #     train_freq: TrainFreq,
-    #     replay_buffer: ReplayBuffer,
-    #     action_noise: Optional[ActionNoise] = None,
-    #     learning_starts: int = 0,
-    #     log_interval: Optional[int] = None,
-    # ) -> RolloutReturn:
-    #     r = super().collect_rollouts(env, callback, train_freq,replay_buffer, action_noise,learning_starts,log_interval)
-    #     reward = self.replay_buffer.rewards[self.replay_buffer.pos]
-    #
-    #     self.normalizer.update()
-    #     return r
+    def collect_rollouts(
+        self,
+        env,
+        callback,
+        train_freq,
+        replay_buffer,
+        action_noise: Optional[ActionNoise] = None,
+        learning_starts: int = 0,
+        log_interval: Optional[int] = None,
+    ):
+        r = super().collect_rollouts(env, callback, train_freq,replay_buffer, action_noise,learning_starts,log_interval)
+        reward = self.replay_buffer.rewards[self.replay_buffer.pos]
+        dones = self.replay_buffer.dones[self.replay_buffer.pos]
+        self.normalizer.update(reward, dones)
+        return r
 
 
 

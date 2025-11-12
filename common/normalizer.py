@@ -16,9 +16,10 @@ class RewardNormalizer(object):
         self.step = 0
         self.rewards = np.zeros((num_seeds, max_steps)) if max_steps is not None else [[] for _ in range(num_seeds)]
         
-    def _calculate_returns_variable_length_trajectory(self, rewards_traj: list, truncate: bool):
+    def _calculate_returns_variable_length_trajectory(self, rewards_traj: list):
         values = np.zeros_like(rewards_traj) #shape (traj_length,)
-        bootstrap = rewards_traj.mean() * self.effective_horizon if truncate else 0.0
+        # bootstrap = rewards_traj.mean() * self.effective_horizon if truncate else 0.0
+        bootstrap = 0.0
         for i in reversed(range(rewards_traj.shape[0])):
             values[i] = rewards_traj[i] + self.discount * bootstrap #shape (traj_length,)
             bootstrap = values[i]
@@ -32,22 +33,20 @@ class RewardNormalizer(object):
             bootstrap = values[:, i]
         return values.min(axis=-1), values.max(axis=-1)
         
-    def _update_variable_length_trajectory(self, rewards: np.ndarray, terminal: np.ndarray, truncate: np.ndarray):
+    def _update_variable_length_trajectory(self, rewards: np.ndarray, done: np.ndarray):
         for i, reward in enumerate(rewards):
             self.rewards[i].append(reward)
-        done = np.logical_or(terminal, truncate)
         if done.any():
             indx = done.nonzero()[0]
             for j in indx:
                 rewards_traj = np.asarray(self.rewards[j])
-                value_min, value_max = self._calculate_returns_variable_length_trajectory(rewards_traj, truncate[j])
+                value_min, value_max = self._calculate_returns_variable_length_trajectory(rewards_traj)
                 self.returns_min_norm[j] = min(self.returns_min_norm[j], value_min) 
-                self.returns_max_norm[j] = max(self.returns_max_norm[j], value_max) 
+                self.returns_max_norm[j] = max(self.returns_max_norm[j], value_max)
                 self.rewards[j] = []
                 
-    def _update_fixed_length_trajectory(self, rewards: np.ndarray, terminal: np.ndarray, truncate: np.ndarray):
+    def _update_fixed_length_trajectory(self, rewards: np.ndarray, dones: np.ndarray):
         self.rewards[:, self.step] = rewards
-        dones = np.logical_or(terminal, truncate)
         if self.step == self.max_steps - 1:
             assert dones.all()
             v_min, v_max = self._calculate_returns_fixed_length_trajectory()
@@ -57,11 +56,11 @@ class RewardNormalizer(object):
         else:
             self.step += 1
         
-    def update(self, rewards: np.ndarray, terminal: np.ndarray, truncate: np.ndarray):
+    def update(self, rewards: np.ndarray, dones: np.ndarray):
         if self.max_steps is not None:
-            self._update_fixed_length_trajectory(rewards, terminal, truncate)
+            self._update_fixed_length_trajectory(rewards, dones)
         else:
-            self._update_variable_length_trajectory(rewards, terminal, truncate)
+            self._update_variable_length_trajectory(rewards, dones)
             
     def normalize(self, batches: ReplayBufferSamplesMTNP, temperature: np.ndarray):
         denominator = np.where(self.returns_max_norm > np.abs(self.returns_min_norm), self.returns_max_norm, np.abs(self.returns_min_norm))

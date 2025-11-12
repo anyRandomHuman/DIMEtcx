@@ -45,17 +45,7 @@ def _create_alg(cfg: DictConfig):
     os.makedirs(save_path, exist_ok=True)
 
     policy = "MultiInputPolicy" if isinstance(training_env.observation_space, gym.spaces.Dict) else "MlpPolicy"
-    model = DIME(
-        policy,
-        env=training_env,
-        model_save_path=save_path,
-        save_every_n_steps=int(cfg.tot_time_steps / 10),
-        cfg=cfg,
-        tensorboard_log=tensorboard_log_dir,
-        replay_buffer_class=rb_class
-    )
-
-    # model = MTDIME(
+    # model = DIME(
     #     policy,
     #     env=training_env,
     #     model_save_path=save_path,
@@ -64,6 +54,16 @@ def _create_alg(cfg: DictConfig):
     #     tensorboard_log=tensorboard_log_dir,
     #     replay_buffer_class=rb_class
     # )
+
+    model = MTDIME(
+        policy,
+        env=training_env,
+        model_save_path=save_path,
+        save_every_n_steps=int(cfg.tot_time_steps / 10),
+        cfg=cfg,
+        tensorboard_log=tensorboard_log_dir,
+        replay_buffer_class=rb_class
+    )
     # Create log dir where evaluation results will be saved
     os.makedirs(eval_log_dir, exist_ok=True)
     # Create callback that evaluates agent
