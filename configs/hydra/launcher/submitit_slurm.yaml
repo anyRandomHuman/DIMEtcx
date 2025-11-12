@@ -19,7 +19,7 @@ cpus_per_gpu: null # Leave null
 gpus_per_task: null # Leave null
 mem_per_gpu: null # Leave null
 mem_per_cpu: null # Leave null
-account: ka_et4232
+account: null
 max_num_timeout: 0
 # Only include this if you want to requeue your jobs
 #additional_parameters: { signal: SIGUSR1@90, requeue: true }

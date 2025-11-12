@@ -232,16 +232,6 @@ class ParallelEnv():
 
 class ParallelVecEnv(VecEnv, ParallelEnv):
 
-    def env_is_wrapped(self, wrapper_class: Type[gym.Wrapper], indices: VecEnvIndices = None) -> List[bool]:
-        target_envs = self._get_target_envs(indices)
-        # Import here to avoid a circular import
-        from stable_baselines3.common import env_util
-        return [env_util.is_wrapped(env_i, wrapper_class) for env_i in target_envs]
-
-    def close(self):
-        for env in self.envs:
-            env.close()
-
     def __init__(self, env_names: list, seed: int = 0, render_mode='rgb_array'):
         ParallelEnv.__init__(self, env_names, seed)
         self.reward = None
@@ -315,3 +305,13 @@ class ParallelVecEnv(VecEnv, ParallelEnv):
     def _get_target_envs(self, indices: VecEnvIndices) -> List[gym.Env]:
         indices = self._get_indices(indices)
         return [self.envs[i] for i in indices]
+
+    def env_is_wrapped(self, wrapper_class: Type[gym.Wrapper], indices: VecEnvIndices = None) -> List[bool]:
+        target_envs = self._get_target_envs(indices)
+        # Import here to avoid a circular import
+        from stable_baselines3.common import env_util
+        return [env_util.is_wrapped(env_i, wrapper_class) for env_i in target_envs]
+
+    def close(self):
+        for env in self.envs:
+            env.close()

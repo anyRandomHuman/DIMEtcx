@@ -88,7 +88,7 @@ class MTDIME(DIME):
             stats_window_size=stats_window_size,
         )
         self.normalize_reward = normalize_reward
-        self.normalizer = RewardNormalizer(0, self.target_entropy) if normalize_reward else None
+        self.normalizer = RewardNormalizer(0, self.target_entropy, v_max=cfg.alg.vmax) if normalize_reward else None
 
 
 
