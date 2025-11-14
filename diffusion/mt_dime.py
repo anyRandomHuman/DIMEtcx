@@ -548,9 +548,10 @@ class MTDIME(DIME):
         log_interval: Optional[int] = None,
     ):
         r = super().collect_rollouts(env, callback, train_freq,replay_buffer, action_noise,learning_starts,log_interval)
-        reward = self.replay_buffer.rewards[self.replay_buffer.pos]
-        dones = self.replay_buffer.dones[self.replay_buffer.pos]
-        self.normalizer.update(reward, dones)
+        if self.normalize_reward:
+            reward = self.replay_buffer.rewards[self.replay_buffer.pos]
+            dones = self.replay_buffer.dones[self.replay_buffer.pos]
+            self.normalizer.update(reward, dones)
         return r
 
 
