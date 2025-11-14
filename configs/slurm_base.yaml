@@ -25,3 +25,4 @@ iters: ${tot_time_steps}
 warmup_iters: 60_000
 
 env_name: ['hb/h1-stand-v0']
+n_tasks: 1
