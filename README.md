@@ -42,3 +42,14 @@ python run_dime.py env_name=Humanoid-v3  alg.critic.v_min=-1600 alg.critic.v_max
 Portions of the project are adapted from other repositories: 
 - https://github.com/DenisBless/UnderdampedDiffusionBridges is licensed under MIT,
 - https://github.com/adityab/CrossQ is licensed under MIT and is built upon code from "[Stable Baselines Jax](https://github.com/araffin/sbx/)"
+
+## To use with Humanoid-Bench
+change requirements to change mujoco to "mujoco==3.1.6", add "mujoco-mjx==3.1.6"
+change the core_requirements of setup.py of humanoid_bench to
+core_requirements = [
+    "ipdb==0.13.13",
+    "gymnax==0.0.8",
+    "brax==0.9.4",
+    "opencv-python==4.10.0.84",
+    "natsort==8.4.0",
+]
