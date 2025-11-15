@@ -232,7 +232,9 @@ class ParallelEnv():
 
 class ParallelVecEnv(VecEnv, ParallelEnv):
 
-    def __init__(self, env_names: list, seed: int = 0, render_mode='rgb_array'):
+    def __init__(self, env_names, seed: int = 0, render_mode='rgb_array'):
+        if isinstance(env_names, str):
+            env_names = [env_names]
         ParallelEnv.__init__(self, env_names, seed)
         self.reward = None
         self.dones = None
