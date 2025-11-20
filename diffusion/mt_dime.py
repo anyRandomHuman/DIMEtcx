@@ -2,10 +2,8 @@ import os
 
 import jax
 import flax
-import optax
 import numpy as np
 import jax.numpy as jnp
-import flax.linen as nn
 
 from gymnasium import spaces
 from functools import partial
@@ -19,24 +17,6 @@ from typing import Any, ClassVar, Dict, Optional, Tuple, Type, Union
 from stable_baselines3.common.type_aliases import GymEnv
 from common.buffers import MTReplayBuffer
 from common.normalizer import RewardNormalizer
-
-class EntropyCoef(nn.Module):
-    ent_coef_init: float = 1.0
-
-    @nn.compact
-    def __call__(self, step) -> jnp.ndarray:
-        log_ent_coef = self.param("log_ent_coef", init_fn=lambda key: jnp.full((), jnp.log(self.ent_coef_init)))
-        return jnp.exp(log_ent_coef)
-
-
-class ConstantEntropyCoef(nn.Module):
-    ent_coef_init: float = 1.0
-
-    @nn.compact
-    def __call__(self, step) -> float:
-        # Hack to not optimize the entropy coefficient while not having to use if/else for the jit
-        self.param("dummy_param", init_fn=lambda key: jnp.full((), self.ent_coef_init))
-        return jax.lax.stop_gradient(self.ent_coef_init)
 
 
 class MTDIME(DIME):
@@ -296,23 +276,3 @@ class MTDIME(DIME):
             dones = self.replay_buffer.dones[self.replay_buffer.pos]
             self.normalizer.update(reward, dones)
         return r
-
-
-
-# Save and load model
-def save_model_state(train_state, path, name, n_steps):
-    # Serialize the model parameters
-    serialized_state = flax.serialization.to_bytes(train_state)
-    os.makedirs(path, exist_ok=True)
-    extended_path = os.path.join(path, f'{name}_{n_steps}.msgpack')
-    # Save the serialized parameters to a file
-    with open(extended_path, 'wb') as f:
-        f.write(serialized_state)
-
-
-def load_state(path, name, n_steps, train_state=None):
-    extended_path = os.path.join(path, f'{name}_{n_steps}.msgpack')
-    # Load the serialized parameters from a file
-    with open(extended_path, 'rb') as f:
-        train_state_loaded = f.read()
-    return flax.serialization.from_bytes(train_state, train_state_loaded)

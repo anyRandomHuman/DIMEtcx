@@ -29,10 +29,10 @@ def _create_alg(cfg: DictConfig):
     # eval_env = make_vec_env(cfg.env_name, n_envs=1, seed=cfg.seed)
     training_env = ParallelVecEnv(cfg.env_name)
     eval_env = ParallelVecEnv(cfg.env_name, seed=42)
-    env_name_split = cfg.env_name[0].split('/')
+    # env_name_split = cfg.env_name[0].split('/')
     rb_class = None
-    if env_name_split[0] == 'dm_control':
-        rb_class = DMCCompatibleDictReplayBuffer if env_name_split[1].split('-')[0] in ['humanoid', 'fish', 'walker', 'quadruped','finger'] else None
+    # if env_name_split[0] == 'dm_control':
+    #     rb_class = DMCCompatibleDictReplayBuffer if env_name_split[1].split('-')[0] in ['humanoid', 'fish', 'walker', 'quadruped','finger'] else None
 
     tensorboard_log_dir = f"./logs/{cfg.wandb['group']}/{cfg.wandb['job_type']}/seed= + {str(cfg.seed)}/"
     eval_log_dir = f"./eval_logs/{cfg.wandb['group']}/{cfg.wandb['job_type']}/seed= + {str(cfg.seed)}/eval/"
@@ -40,7 +40,7 @@ def _create_alg(cfg: DictConfig):
     save_path = './checkpoints'
     if os.environ.get('SLURM_SUBMIT_DIR'):
         save_path = '/pfs/work9/workspace/scratch/ka_et4232-tcx/checkpoints/dime'
-    save_path = save_path + f'/{env_name_split[1]}/{cfg.seed}'
+    save_path = save_path + f'/{cfg.env_name}/{cfg.seed}'
 
     os.makedirs(save_path, exist_ok=True)
 
