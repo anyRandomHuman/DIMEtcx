@@ -39,7 +39,8 @@ def make_dummy_env(names, seed=0, repeat_envs=1):
     from stable_baselines3.common.vec_env import DummyVecEnv
     from stable_baselines3.common.utils import set_random_seed
     set_random_seed(seed)
-    if repeat_envs >= 1:
+    names = [names] if isinstance(names, str) else list(names)
+    if repeat_envs > 1:
         names = sorted(names * repeat_envs) #sort to make sure the same envs are adjacent
     envs = DummyVecEnv([lambda: make_env(name, seed+i) for i,name in enumerate(names)])
     envs.reset()
