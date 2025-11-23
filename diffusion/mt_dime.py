@@ -37,7 +37,6 @@ class MTDIME(DIME):
                  cfg,
                  train_freq: Union[int, Tuple[int, str]] = 1,
                  action_noise: Optional[ActionNoise] = None,
-                 replay_buffer_class: Optional[Type[MTReplayBuffer]] = None,
                  replay_buffer_kwargs: Optional[Dict[str, Any]] = None,
                  use_sde: bool = False,
                  sde_sample_freq: int = -1,

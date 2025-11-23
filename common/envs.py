@@ -28,6 +28,23 @@ class FlattenObservationShadowhandWrapper(gym.ObservationWrapper):
     def observation(self, obs: dict) -> np.ndarray:
         return np.concatenate((obs['observation'], obs['desired_goal']), axis=-1)
 
+def make_dummy_env(names, seed=0, repeat_envs=1):
+    """
+    Utility function for multiprocessed env.
+
+    :param env_id: (str) the environment ID
+    :param seed: (int) the inital seed for RNG
+    :param rank: (int) index of the subprocess
+    """
+    from stable_baselines3.common.vec_env import DummyVecEnv
+    from stable_baselines3.common.utils import set_random_seed
+    set_random_seed(seed)
+    if repeat_envs >= 1:
+        names = sorted(names * repeat_envs) #sort to make sure the same envs are adjacent
+    envs = DummyVecEnv([lambda: make_env(name, seed+i) for i,name in enumerate(names)])
+    envs.reset()
+    return envs
+
 def _make_env_dmc(env_name: str, seed: int = 0, num_env=1) -> gym.Env:
     if num_env != 1:
         # import  envpool
