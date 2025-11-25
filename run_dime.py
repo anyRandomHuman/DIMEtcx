@@ -41,7 +41,7 @@ def _create_alg(cfg: DictConfig):
 
     save_path = './checkpoints'
     if os.environ.get('SLURM_SUBMIT_DIR'):
-        save_path = '/pfs/work9/workspace/scratch/ka_et4232-tcx/checkpoints/dime'
+        save_path = '/pfs/work9/workspace/scratch/ka_et4232-restored/ka_et4232-tcx-1763778846/checkpoints/dime'
     save_path = save_path + f'/{cfg.env_name}/{cfg.seed}'
 
     os.makedirs(save_path, exist_ok=True)
@@ -107,7 +107,7 @@ def initialize_and_run(cfg):
     model.learn(total_timesteps=cfg.tot_time_steps, progress_bar=True, callback=callback_list)
 
 
-@hydra.main(version_base=None, config_path="configs", config_name="base")
+@hydra.main(version_base=None, config_path="configs", config_name="slurm_base")
 def main(cfg: DictConfig) -> None:
     try:
         starting_time = time.time()
